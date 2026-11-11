@@ -25,16 +25,21 @@ def flow_window_features(df, ports=FLOW_PORTS):
     return out
 
 
-def auth_failures_rolling(df, window="10min"):
-    """Failures per user in the window ending at each event (current row included)."""
-    col = f"failures_{window}"
+def auth_failures_rolling(df, window="10min", by=("user",)):
+    """Failures in the window ending at each event, counted per group in `by`.
+
+    by=("user",) counts across all IPs. by=("user", "src_ip") counts only
+    failures from the same IP, which is what S1 and S3 need.
+    """
+    by = list(by)
+    col = f"failures_{window}" if by == ["user"] else f"failures_{window}_{'_'.join(by)}"
     df = df.copy().sort_values("timestamp", kind="stable").reset_index(drop=True)
     if df.empty:
         df[col] = pd.Series(dtype=int)
         return df
 
     parts = []
-    for _, g in df.groupby("user"):
+    for _, g in df.groupby(by):
         s = g.set_index("timestamp")["is_failure"].rolling(window).sum()
         parts.append(pd.Series(s.values, index=g.index))
     df[col] = pd.concat(parts).astype(int)

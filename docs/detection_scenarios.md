@@ -38,10 +38,11 @@ Two data sources are used, and the README must say so openly:
 - **MITRE ATT&CK:** T1078 Valid Accounts (result of a successful credential attack)
 - **Log source:** authentication logs
 - **Entity:** user
-- **Signal:** a successful login preceded by failures for the same user, from a source IP the user has not successfully logged in from before
-- **Window and threshold:** 3 or more failures in the 10 minutes before the success, AND the success IP is not in the user's history of previous successful logins
+- **Signal:** a successful login from a source IP the user has not successfully logged in from before, preceded by failures from that same IP for the same user
+- **Window and threshold:** 3 or more failures from the success IP for that user in the 10 minutes up to the success, AND the success IP is not in the user's history of previous successful logins
 - **Benign lookalike:** a user typing their password wrong twice, then succeeding from their usual IP (the new-IP condition suppresses this)
 - **Falsified if:** it alerts on alice's typo at 09:30, or misses bob's success at 13:03:44
+- **Not covered (variant):** failures from one IP, then a success from a different new IP. Also suspicious, but a separate and weaker scenario that is not implemented.
 - **Known evasion:** the attacker logs in from an IP already in the user's history (for example, through a compromised internal host), or succeeds on the first try with stolen credentials (no failures at all)
 
 ### Expected alerts on the sample file (derived by hand)

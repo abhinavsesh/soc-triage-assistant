@@ -46,7 +46,8 @@ Run: `python scripts/phase5.py` on `data/sample/auth_sample.csv` and `data/raw/t
 - The score is a prioritisation aid. It is not a probability of compromise.
 - The cap at 100 hides differences between very severe incidents (bob at 105 and a hypothetical 130 both show 100).
 - Signals can overlap. S3 already requires a new IP, so new_source_ip is not added for S3 to avoid double counting.
-- S1 counts failures per user across all IPs, which is a simplification.
+- S1 and S3 count failures per (user, source IP). Failures from different IPs are not combined, so a distributed attack against one account can fall below every threshold.
+- Evidence is kept as a list of observations per scenario. The LLM packet shows at most 5 per scenario and records the total.
 - Incidents are grouped per entity without splitting on time gaps, so a long campaign becomes one incident.
 - Off-hours is not used for flow data because CICIDS timestamps have no AM/PM marker.
 - An attacker who knows the rules can keep the score low: stay under thresholds, spread attempts across IPs, log in from an IP already in the user's history, or flood a victim with noise to bury real alerts.
