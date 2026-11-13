@@ -39,3 +39,17 @@ def parse_json(text):
         text = text.strip("`")
         text = text[text.find("{"):]
     return json.loads(text)
+
+
+def chat_raw(messages, tools=None, model=OLLAMA_MODEL):
+    """One chat turn. Returns the raw message dict, which may contain tool_calls."""
+    payload = {"model": model, "messages": messages, "stream": False,
+               "options": {"temperature": 0, "seed": 0, "num_ctx": 4096}}
+    if tools:
+        payload["tools"] = tools
+    try:
+        r = requests.post(f"{OLLAMA_URL}/api/chat", json=payload, timeout=LLM_TIMEOUT_S)
+        r.raise_for_status()
+    except requests.RequestException as e:
+        raise LLMError(f"Ollama request failed ({type(e).__name__}). Is `ollama serve` running?") from e
+    return r.json()["message"]
