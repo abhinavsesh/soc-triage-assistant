@@ -1,3 +1,4 @@
+altair==6.3.0
 annotated-doc==0.0.6
 annotated-types==0.8.0
 anyio==4.16.0
@@ -37,6 +38,7 @@ ipython==9.18.1
 ipython_pygments_lexers==1.1.1
 ipywidgets==8.1.9
 isoduration==20.11.0
+itsdangerous==2.2.0
 jedi==0.20.1
 Jinja2==3.1.6
 joblib==1.6.0
@@ -82,18 +84,22 @@ platformdirs==4.14.5
 pluggy==1.7.0
 prometheus_client==0.26.0
 prompt_toolkit==3.0.53
+protobuf==7.36.2
 psutil==7.2.2
 ptyprocess==0.7.0
 pure_eval==0.2.4
+pyarrow==26.0.1
 pycparser==3.12
 pydantic==2.14.3
 pydantic_core==2.50.4
+pydeck==0.9.3
 Pygments==2.21.0
 pyparsing==3.3.3
 pytest==9.2.0
 python-dateutil==4.0.0
 python-dotenv==1.2.4
 python-json-logger==4.2.0
+python-multipart==0.0.34
 PyYAML==6.0.3
 pyzmq==27.3.0
 referencing==0.37.0
@@ -109,6 +115,7 @@ six==1.17.0
 soupsieve==4.1
 stack-data==0.6.3
 starlette==1.10.0
+streamlit==1.67.0
 terminado==0.18.1
 threadpoolctl==3.8.0
 tinycss2==1.5.1

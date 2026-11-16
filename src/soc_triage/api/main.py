@@ -119,6 +119,12 @@ def health():
     return {"status": "ok"}
 
 
+@router.get("/me")
+def me(analyst: Analyst):
+    """Who am I? The identity comes from the API key."""
+    return {"analyst": analyst}
+
+
 # ---------- ingest ----------
 @router.post("/ingest/auth", response_model=IngestResult)
 def ingest_auth(body: AuthIngest, conn: Conn, analyst: Analyst):

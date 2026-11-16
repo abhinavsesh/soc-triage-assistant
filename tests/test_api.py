@@ -260,3 +260,11 @@ def test_rejected_action_cannot_execute(client):
     client.post(f"/actions/{act}/decision", json={"decision": "reject"}, headers=H2)
     assert client.post(f"/actions/{act}/execute", headers=H2).status_code == 403
     assert len(client.get("/actions?status=rejected", headers=H1).json()) == 1
+
+
+def test_me_returns_identity(client):
+    assert client.get("/me", headers=H2).json() == {"analyst": "analyst_2"}
+
+
+def test_me_requires_key(client):
+    assert client.get("/me").status_code == 401
