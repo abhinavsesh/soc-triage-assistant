@@ -268,3 +268,20 @@ def test_me_returns_identity(client):
 
 def test_me_requires_key(client):
     assert client.get("/me").status_code == 401
+
+
+def test_sample_file_end_to_end(client):
+    """The 18-row sample must produce exactly the alerts derived by hand in docs/detection_scenarios.md."""
+    import csv
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / "data" / "sample" / "auth_sample.csv"
+    with open(path, newline="") as fh:
+        events = [{"timestamp": r["timestamp"].replace(" ", "T"), "user": r["user"],
+                   "src_ip": r["src_ip"], "result": r["result"]} for r in csv.DictReader(fh)]
+    r = client.post("/ingest/auth", json={"events": events}, headers=H1)
+    assert r.json() == {"events": 18, "alerts_created": 2, "alerts_duplicate": 0}
+    alerts = client.get("/alerts", headers=H1).json()
+    assert [(a["entity"], a["risk_score"], a["severity"]) for a in alerts] == [
+        ("user:bob", 100, "high"), ("ip:198.51.100.23", 40, "medium")]
+    assert not any(a["entity"] == "user:alice" for a in alerts)  # the typo must not alert
