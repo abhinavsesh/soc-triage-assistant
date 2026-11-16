@@ -1,5 +1,6 @@
 """Human-approval gate. The model can only PROPOSE. Nothing in this project changes a real
-system: the default executor only writes a log line."""
+system: the default executor only writes a log line. The rules live in two helper functions
+so the in-memory queue and the database version cannot drift apart."""
 import ipaddress
 import logging
 from dataclasses import dataclass
@@ -27,6 +28,29 @@ class ProposedAction:
     decided_at: str = ""
 
 
+def validate_proposal(action, target):
+    """Return the cleaned target, or raise ValueError."""
+    if action not in ACTION_TYPES:
+        raise ValueError(f"unknown action type: {sanitise(action)}")
+    target = str(target)
+    if action == "block_ip":
+        try:
+            ipaddress.ip_address(target)
+        except ValueError:
+            raise ValueError("block_ip target must be a valid IP address") from None
+    elif not USER_RE.match(target):
+        raise ValueError("target must be a valid username")
+    return target
+
+
+def check_decider(analyst, proposed_by):
+    """Return the normalised decider name, or raise PermissionError."""
+    who = str(analyst).strip().lower()
+    if who in MODEL_IDENTITIES or who == str(proposed_by).strip().lower():
+        raise PermissionError("a human other than the proposer must decide")
+    return who
+
+
 def dry_run_executor(item):
     logger.info("DRY RUN: would %s on %s (approved by %s). No system was changed.",
                 item.action, item.target, item.decided_by)
@@ -38,16 +62,7 @@ class ApprovalQueue:
         self._next = 1
 
     def propose(self, entity, action, target, reason, proposed_by="llm"):
-        if action not in ACTION_TYPES:
-            raise ValueError(f"unknown action type: {sanitise(action)}")
-        target = str(target)
-        if action == "block_ip":
-            try:
-                ipaddress.ip_address(target)
-            except ValueError:
-                raise ValueError("block_ip target must be a valid IP address") from None
-        elif not USER_RE.match(target):
-            raise ValueError("target must be a valid username")
+        target = validate_proposal(action, target)
         item = ProposedAction(self._next, sanitise(entity), action, target,
                               sanitise(reason), str(proposed_by).strip().lower())
         self._items[item.id] = item
@@ -57,9 +72,7 @@ class ApprovalQueue:
 
     def _decide(self, action_id, analyst, status):
         item = self._items[action_id]
-        who = str(analyst).strip().lower()
-        if who in MODEL_IDENTITIES or who == item.proposed_by:
-            raise PermissionError("a human other than the proposer must decide")
+        who = check_decider(analyst, item.proposed_by)
         if item.status != "pending":
             raise ValueError(f"action is already {item.status}")
         item.status, item.decided_by = status, who
