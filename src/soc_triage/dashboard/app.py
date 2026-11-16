@@ -116,6 +116,8 @@ m1.metric("Risk score", d["risk_score"])
 m2.metric("Severity", d["severity"])
 m3.metric("Status", d["status"])
 st.text(f"First seen: {d['first_seen']}")
+if d["kind"] == "flow":
+    st.text("Note: CICIDS2017 timestamps have no AM/PM marker, so afternoon times can show 12 hours early.")
 
 tab_ev, tab_ai, tab_status, tab_actions, tab_hist = st.tabs(
     ["Evidence", "AI explanation", "Status", "Response actions", "History"])

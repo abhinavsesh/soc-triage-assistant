@@ -12,7 +12,7 @@ MITRE = {
     },
     "auth_s3_success_after_failures": {
         "id": "T1078", "name": "Valid Accounts",
-        "tactic": "Initial Access, Persistence, Privilege Escalation, Defense Evasion (called Stealth in newer ATT&CK versions)",
+        "tactic": "Multiple tactics (see attack.mitre.org/techniques/T1078)",
         "confidence": "low",
     },
     "flow_rule_hit": {
