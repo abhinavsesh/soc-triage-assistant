@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from soc_triage.api.db import connect, init_db, store_alerts
 from soc_triage.detection.incidents import detect_auth, detect_flows
 from soc_triage.features.windows import flow_window_features
@@ -10,7 +12,10 @@ def main():
     setup_logging()
     auth = load_auth("data/sample/auth_sample.csv")
     incidents = detect_auth(auth)
-    incidents += detect_flows(flow_window_features(clean_flows(load_flows("data/raw/tuesday.csv"))))
+    if Path("data/raw/tuesday.csv").exists():
+        incidents += detect_flows(flow_window_features(clean_flows(load_flows("data/raw/tuesday.csv"))))
+    else:
+        print("data/raw/tuesday.csv not found: loading login alerts only (see the README for the dataset)")
     alerts = build_alerts(incidents)
     conn = connect()
     init_db(conn)
